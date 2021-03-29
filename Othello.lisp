@@ -224,15 +224,24 @@
 
 ;GAME OVER
 
-;(defun gameOver (estado)
-;    (cond
-;        ((null (member 0 estado :test #‘eq));Ya no hay espacios vacíos
+(defun gameOver (estado flag); Flag se debe de manipular mientras se ejecuta: si detectamos que al expandir un nodo solo hay un nodo posible lo almacenamos en algun lugar (porque puede significar que no hay movimiento posible)
+    (cond                    ; si al expandir ese otro nodo solo hay un escenario, entonces comparamos el almacenado con el nuevo, y si son iguales activamos flag (significa que ya no hay movimientos).Regresa NIL si no ha terminado, 0 si es empate, 1 si ganamos, 2 si perdemos
+        ((or flag (null (member 0 estado))) (quienGana estado));Ya no hay espacios vacíos
+        (t NIL)))
         
-;(defun calculaMovimientos (estado)
+(defun ganador (estado); Para cuando ya acabo el juego determinar quién ganó
+    (cond
+        ((null estado) suma)
+        ((= (car estado) 1) (incf suma) (ganador (cdr estado)))
+        ((= (car estado) 2) (decf suma) (ganador (cdr estado)))
+        (t (ganador (cdr estado)))))
 
-(defun calculaMovimientosAux (estadoM i jugador rival); Regresa una lista con los estados a los que es posible expandir dado que mueve el jugador indicado. Durante el proceso modificamos la lista estadoM
-    (setq numCambios (listaEjes estadoM i jugador rival))
-    (setq aux (copy-tree lista1H) suma 0))
+(defun quienGana (estado)
+    (setq gana (ganador estado))
+    (cond
+        ((> gana 0) 1)
+        ((< gana 0) 2)
+        (t 0)))
 
 ;POSIBLES MOVIMIENTOS
 
