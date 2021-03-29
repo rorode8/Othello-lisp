@@ -11,6 +11,7 @@
 ;Estabilidad de orillas
 ;(setq estado '(0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63))
 ;(setq prueba '(1 0 1 1 1 0 0 0 2 2 0 1 2 1 0 0 0 0 0 1 1 1 2 2 2 2 2 1 2 0 1 1 1 1 0 2 2 0 0 0 0 0 0 0 0 0 1 0 0 2 0 0 1 0 2 0 1 0 0 0 0 0 0 0))
+;(setq estado '(0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 2 0 0 0 0 0 0 2 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0))
 (defun edgEst (estado numMovimiento) ;el estado es una lista de 64 elementos (0's 1's y 2's)
     ;Necesitamos descomponer el estado en las listas que nos interesan (4 orillas, 2 diagonales)
     (setq orillaIzq `(,(nth 0 estado) ,(nth 8 estado) ,(nth 16 estado) ,(nth 24 estado) ,(nth 32 estado) ,(nth 40 estado) ,(nth 48 estado) ,(nth 56 estado)) orillaTop (reverse (nthcdr 56 (reverse estado))) orillaDer `(,(nth 7 estado) ,(nth 15 estado) ,(nth 23 estado) ,(nth 31 estado) ,(nth 39 estado) ,(nth 47 estado) ,(nth 55 estado) ,(nth 63 estado)) orillaBot (nthcdr 56 estado) diagonalIzq `(,(nth 0 estado) ,(nth 9 estado) ,(nth 18 estado) ,(nth 27 estado) ,(nth 36 estado) ,(nth 45 estado) ,(nth 54 estado) ,(nth 63 estado)) diagonalDer `(,(nth 7 estado) ,(nth 14 estado) ,(nth 21 estado) ,(nth 28 estado) ,(nth 35 estado) ,(nth 42 estado) ,(nth 45 estado) ,(nth 56 estado)))
@@ -71,7 +72,7 @@
 
 (defun aplicaCambiosEsquina (lista)
     (cond
-        ((= (car lista) 0) (setf (nth 0 lista) 2) (setq lista1 (copy-list lista) lista2 (copy-list lista))
+        ((= (car lista) 0) (setf (nth 0 lista) 2) (setq lista1 (copy-tree lista) lista2 (copy-tree lista))
         (aplicaCambiosEsquinaAux (cdr lista) 1))
         (t lista)))
 
@@ -193,7 +194,7 @@
 
 (defun potMob (estado)
     (setq suma11 0 suma12 0 suma21 0 suma22 0 suma31 0 suma32 0)
-    (revisaMatriz estado (copy-list estado) 0))
+    (revisaMatriz estado (copy-tree estado) 0))
 
 (defun revisaMatriz (estado estadoAux i) ; suma1 = algunCuadroVacio, suma2 = algunaPiezaAdyacente, suma3 = numeroCuadrosVacios
     (cond
@@ -220,4 +221,107 @@
     (when (and (< n 7) (< m 7) (= (nth (+ n 1) (nth (+ m 1) estadoM)) elem)) (incf suma))
     (when (and (< m 7) (= (nth n (nth (+ m 1) estadoM)) elem)) (incf suma))
     suma)
+
+;GAME OVER
+
+;(defun gameOver (estado)
+;    (cond
+;        ((null (member 0 estado :test #‘eq));Ya no hay espacios vacíos
+        
+;(defun calculaMovimientos (estado)
+
+(defun calculaMovimientosAux (estadoM i jugador rival); Regresa una lista con los estados a los que es posible expandir dado que mueve el jugador indicado. Durante el proceso modificamos la lista estadoM
+    (setq numCambios (listaEjes estadoM i jugador rival))
+    (setq aux (copy-tree lista1H) suma 0))
+
+;POSIBLES MOVIMIENTOS
+
+(defun movimientos (estado jugador rival)
+    (setq sigNivel NIL estadoM `(,(nthcdr 0 (reverse (nthcdr (max (- (length estado) 8) 0) (reverse estado)))) ,(nthcdr 8 (reverse (nthcdr (max (- (length estado) 16) 0) (reverse estado)))) ,(nthcdr 16 (reverse (nthcdr (max (- (length estado) 24) 0) (reverse estado)))) ,(nthcdr 24 (reverse (nthcdr (max (- (length estado) 32) 0) (reverse estado)))) ,(nthcdr 32 (reverse (nthcdr (max (- (length estado) 40) 0) (reverse estado)))) ,(nthcdr 40 (reverse (nthcdr (max (- (length estado) 48) 0) (reverse estado)))) ,(nthcdr 48 (reverse (nthcdr (max (- (length estado) 56) 0) (reverse estado)))) ,(nthcdr 56 (reverse (nthcdr (max (- (length estado) 64) 0) (reverse estado))))) movs (recorreMatriz estado estadoM 0 jugador rival))
+    (if (null movs) estado movs))
+
+(defun recorreMatriz (estado estadoM i jugador rival)
+    (cond
+        ((null estado) sigNivel)
+        ((= (car estado) 0) (setq edoMaux (copy-tree estadoM)) (ejecutaCambiosLegales edoMaux (listaEjes edoMaux i jugador rival) jugador i)
+            (when (not (equal edoMaux estadoM)) (push (aplana edoMaux) sigNivel)) (recorreMatriz (cdr estado) estadoM (+ i 1) jugador rival))
+        (t (recorreMatriz (cdr estado) estadoM (+ i 1) jugador rival))))
+       
+(defun aplana (edoMaux)
+    (append (nth 0 edoMaux) (nth 1 edoMaux) (nth 2 edoMaux) (nth 3 edoMaux) (nth 4 edoMaux) (nth 5 edoMaux) (nth 6 edoMaux) (nth 7 edoMaux)))
     
+(defun calculaCambiosLegales (lista elem1 elem2);lista está compuesta por las casillas subsecuentes a la analizada. Elem1 es mi número, elem2 el del rival. Regresa el número de tus piezas que cambian
+    (cond
+        ((or (null lista) (= (car lista) 0)) NIL)
+        ((= (car lista) elem2) (incf suma) (calculaCambiosLegales (cdr lista) elem1 elem2))
+        (t suma)))
+
+(defun listaCambiosLegalesEje (lista jugador rival)
+    (setq suma 0 cambios (calculaCambiosLegales lista jugador rival))
+    (if (null cambios) 0 suma))
+    
+(defun listaEjes (edoMaux i jugador rival) ;Regresa la lista de los cambios (números) que se deben de ejecutar en esa celda
+    (setq m (floor (/ i 8)) listaH (nth m edoMaux) n (mod i 8))
+    ;Armamos listas horizontales alrededor de la casilla i
+    (setq lista2H (nthcdr (+ n 1) listaH) lista1H (nthcdr (- (length listaH) n) (reverse listaH)))
+    ;Armamos listas verticales
+    (setq listaV `(,(nth n (nth 0 edoMaux)) ,(nth n (nth 1 edoMaux)) ,(nth n (nth 2 edoMaux)) ,(nth n (nth 3 edoMaux)) ,(nth n (nth 4 edoMaux)) ,(nth n (nth 5 edoMaux)) ,(nth n (nth 6 edoMaux)) ,(nth n (nth 7 edoMaux))) lista2V (nthcdr (+ m 1) listaV) lista1V (nthcdr (- (length listaV) m) (reverse listaV)))
+    ;Armamos listas diagonal \
+    (setq lstI NIL lstF NIL listaDI (append (armaDiagonalIzqPrin n m edoMaux) (armaDiagonalIzqFin n m edoMaux)) lista2DI (nthcdr (+ (min n m) 1) listaDI) lista1DI (nthcdr (- (length listaDI) (min n m)) (reverse listaDI)))
+    ;Armamos listas diagonal /
+    (setq lstI NIL lstF NIL listaDD (append (armaDiagonalDerPrin n m edoMaux) (armaDiagonalDerFin n m edoMaux)) lista2DD (nthcdr (+ (min (- 7 n) m) 1) listaDD) lista1DD (nthcdr (- (length listaDD) (min (- 7 n) m)) (reverse listaDD)))
+    ;Ya tenemos las listas ahora checamos para cada dirección cuántas piezas se tienen que agregar si se juega en ese lugar (empieza en pi radianes y va en el sentido de las manecillas)
+    (list (listaCambiosLegalesEje lista1H jugador rival) (listaCambiosLegalesEje lista1DI jugador rival) (listaCambiosLegalesEje lista1V jugador rival) (listaCambiosLegalesEje lista1DD jugador rival) (listaCambiosLegalesEje lista2H jugador rival) (listaCambiosLegalesEje lista2DI jugador rival) (listaCambiosLegalesEje lista2V jugador rival) (listaCambiosLegalesEje lista2DD jugador rival)))
+    
+(defun ejecutaCambiosLegales (edoMaux numCambios jugador i)
+    (when (> (apply '+ numCambios) 0) (setf (nth n (nth m edoMaux)) jugador))
+    (setq m (floor (/ i 8)) listaH (nth m edoMaux) n (mod i 8))
+    (cambiosHorizontales1 edoMaux m n (pop numCambios) jugador)
+    (cambiosDiagIzq1 edoMaux m n (pop numCambios) jugador)
+    (cambiosVerticales1 edoMaux m n (pop numCambios) jugador)
+    (cambiosDiagDer1 edoMaux m n (pop numCambios) jugador)
+    (cambiosHorizontales2 edoMaux m n (pop numCambios) jugador)
+    (cambiosDiagIzq2 edoMaux m n (pop numCambios) jugador)
+    (cambiosVerticales2 edoMaux m n (pop numCambios) jugador)
+    (cambiosDiagDer2 edoMaux m n (pop numCambios) jugador)
+    edoMaux)
+    
+(defun cambiosHorizontales1 (edoMaux m n cuantos jugador)
+    (cond
+        ((or (null cuantos) (= cuantos 0)) edoMaux)
+        (t (setf (nth (- n cuantos) (nth m edoMaux)) jugador) (cambiosHorizontales1 edoMaux m n (- cuantos 1) jugador))))
+        
+(defun cambiosHorizontales2 (edoMaux m n cuantos jugador)
+    (cond
+        ((or (null cuantos) (= cuantos 0)) edoMaux)
+        (t (setf (nth (+ n cuantos) (nth m edoMaux)) jugador) (cambiosHorizontales2 edoMaux m n (- cuantos 1) jugador))))
+        
+(defun cambiosVerticales1 (edoMaux m n cuantos jugador)
+    (cond
+        ((or (null cuantos) (= cuantos 0)) edoMaux)
+        (t (setf (nth n (nth (- m cuantos) edoMaux)) jugador) (cambiosVerticales1 edoMaux m n (- cuantos 1) jugador))))
+        
+(defun cambiosVerticales2 (edoMaux m n cuantos jugador)
+    (cond
+        ((or (null cuantos) (= cuantos 0)) edoMaux)
+        (t (setf (nth n (nth (+ m cuantos) edoMaux)) jugador) (cambiosVerticales2 edoMaux m n (- cuantos 1) jugador))))
+        
+(defun cambiosDiagIzq1 (edoMaux m n cuantos jugador)
+    (cond
+        ((or (null cuantos) (= cuantos 0)) edoMaux)
+        (t (setf (nth (- n cuantos) (nth (- m cuantos) edoMaux)) jugador) (cambiosDiagIzq1 edoMaux m n (- cuantos 1) jugador))))
+
+(defun cambiosDiagIzq2 (edoMaux m n cuantos jugador)
+    (cond
+        ((or (null cuantos) (= cuantos 0)) edoMaux)
+        (t (setf (nth (+ n cuantos) (nth (+ m cuantos) edoMaux)) jugador) (cambiosDiagIzq2 edoMaux m n (- cuantos 1) jugador))))
+        
+(defun cambiosDiagDer1 (edoMaux m n cuantos jugador)
+    (cond
+        ((or (null cuantos) (= cuantos 0)) edoMaux)
+        (t (setf (nth (+ n cuantos) (nth (- m cuantos) edoMaux)) jugador) (cambiosDiagDer1 edoMaux m n (- cuantos 1) jugador))))
+        
+(defun cambiosDiagDer2 (edoMaux m n cuantos jugador)
+    (cond
+        ((or (null cuantos) (= cuantos 0)) edoMaux)
+        (t (setf (nth (- n cuantos) (nth (+ m cuantos) edoMaux)) jugador) (cambiosDiagDer2 edoMaux m n (- cuantos 1) jugador))))
