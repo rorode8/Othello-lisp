@@ -1,12 +1,70 @@
 ;En general se va a asumir que los espacios vacíos están representados con 0's, las piezas propias con 1's y las rivales con 2's
 
+;ALPHA-BETA PRUNING
+
+(defpackage :alphabeta
+  (:use :cl)
+  ;; custom min/max functions that support infinity
+  (:shadow min max))
+
+(in-package :alphabeta)
+
+;(defvar -∞ '-∞ "Negative infinity symbol")
+;(defvar +∞ '+∞ "Positive infinity symbol")
+
+(defun min (a b)
+  (cond
+    ((eql a 1099511627775) b)
+    ((eql b 1099511627775) a)
+    ((eql a -1099511627775) -1099511627775)
+    ((eql b -1099511627775) -1099511627775)
+    (t (cl:min a b))))
+
+(defun max (a b)
+  (cond
+    ((eql a -1099511627775) b)
+    ((eql b -1099511627775) a)
+    ((eql a 1099511627775) 1099511627775)
+    ((eql b 1099511627775) 1099511627775)
+    (t (cl:max a b))))
+    
+(defun alphabeta (nodo depth alpha beta maximizing-player-p i)
+  (when (or (= depth 0) (gameOver nodo))
+    (return-from alphabeta (evalua nodo i)))
+  (if maximizing-player-p
+      (let ((value -1099511627775))
+        (dolist (child (movimientos nodo 1 2))
+          (setf value (max value (alphabeta child (1- depth) alpha beta nil (+ i 1))))
+          (setf alpha (max alpha value))
+          (when (<= beta alpha)
+            ;; beta cut-off
+            (return)))
+        value)
+      (let ((value 1099511627775))
+        (dolist (child (movimientos nodo 2 1))
+          (setf value (min value (alphabeta child (1- depth) alpha beta t (+ i 1))))
+          (setf alpha (min alpha value))
+          (when (<= beta alpha)
+            ;; alpha cut-off
+            (return)))
+        value)))
+
+;FUNCIÓN FINAL
+
+
+
+;(setq estado '(0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 2 0 0 0 0 0 0 2 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0))		
+;(setq estado '(1 0 0 0 0 1 1 1 1 2 0 0 0 1 2 2 1 0 0 0 0 0 0 0 0 2 2 1 2 0 0 0 0 1 1 2 1 0 0 0 0 0 1 1 1 1 2 0 0 0 0 0 0 2 2 2 1 0 0 0 0 0 0 2))		
+;(alphabeta estado 3 -1099511627775 1099511627775 T 0)
+
 ; FUNCIÓN DE EVALUACIÓN
 
 (defun evalua (estado numMovimiento)
+    (if (or (gameOver estado) (equal (movimientos estado 1 2) (movimientos estado 2 1))) (quienGana estado)
     (+
     (* (+ 312 36 (* 6.24 numMovimiento)) (edgEst estado numMovimiento))
     (* (if (> numMovimiento 25) (+ 75 numMovimiento) (+ 50 (* 2 numMovimiento))) (currMob estado))
-    (* 99 (potMob estado))))
+    (* 99 (potMob estado)))))
 
 ;Estabilidad de orillas
 ;(setq estado '(0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63))
@@ -39,7 +97,7 @@
 
 (defun tomaEsquina (lista)
     (cond
-        ((eq (cadr lista) 1) revisaSecuencia(cddr lista))
+        ((eq (cadr lista) 1) (revisaSecuencia (cddr lista)))
         (t NIL)))
 
 (defun revisaSecuencia (lst)
@@ -224,9 +282,9 @@
 
 ;GAME OVER
 
-(defun gameOver (estado flag); Flag se debe de manipular mientras se ejecuta: si detectamos que al expandir un nodo solo hay un nodo posible lo almacenamos en algun lugar (porque puede significar que no hay movimiento posible)
+(defun gameOver (estado); Flag se debe de manipular mientras se ejecuta: si detectamos que al expandir un nodo solo hay un nodo posible lo almacenamos en algun lugar (porque puede significar que no hay movimiento posible)
     (cond                    ; si al expandir ese otro nodo solo hay un escenario, entonces comparamos el almacenado con el nuevo, y si son iguales activamos flag (significa que ya no hay movimientos).Regresa NIL si no ha terminado, 0 si es empate, 1 si ganamos, 2 si perdemos
-        ((or flag (null (member 0 estado))) (quienGana estado));Ya no hay espacios vacíos
+        ((null (member 0 estado)) T);Ya no hay espacios vacíos
         (t NIL)))
         
 (defun ganador (estado); Para cuando ya acabo el juego determinar quién ganó
@@ -239,8 +297,8 @@
 (defun quienGana (estado)
     (setq gana (ganador estado))
     (cond
-        ((> gana 0) 1)
-        ((< gana 0) 2)
+        ((> gana 0) 1099511627775)
+        ((< gana 0) -1099511627775)
         (t 0)))
 
 ;POSIBLES MOVIMIENTOS
@@ -334,3 +392,4 @@
     (cond
         ((or (null cuantos) (= cuantos 0)) edoMaux)
         (t (setf (nth (- n cuantos) (nth (+ m cuantos) edoMaux)) jugador) (cambiosDiagDer2 edoMaux m n (- cuantos 1) jugador))))
+        
