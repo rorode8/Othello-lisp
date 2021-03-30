@@ -7,6 +7,7 @@ Created on Sat Mar 27 18:37:32 2021
 import pygame
 import random
 import sys
+import time
 #constants
 BOARD_SIZE=483
 WIDTH,HEIGHT=780, 483
@@ -267,50 +268,67 @@ def main():
     
     while run:
         ##Othello logic
-        print(turn)
-        if(finish):
-            break
-        
         clock.tick(FPS)
-        
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                run = False
-                
-            if event.type == pygame.MOUSEBUTTONDOWN and turn == 'X':
-                print("x")
-                x,y = pygame.mouse.get_pos()
-                move = getPlayerMove(mainBoard, playerTile,x,y)
-                if(move!=False):
-                    makeMove(mainBoard, playerTile, move[0], move[1])
-                    turn = 'O'
-                
-            if getValidMoves(mainBoard, computerTile) == []:
-                turn = 'X'
+        #print(turn)
+        if(finish):
+           for event in pygame.event.get():
+               if event.type == pygame.KEYDOWN and event.key == pygame.K_r:
+                    mainBoard = getNewBoard()
+                    resetBoard(mainBoard)
+                    playerTile, computerTile = 'X','O'
+                    turn = 'X'
+                    finish = False
+                    drawBoard(mainBoard)
+           
+        else:
+            
+            if turn == 'O':
+                time.sleep(1)
+                #showPoints(playerTile, computerTile)
+                x, y = getComputerMove(mainBoard, computerTile)
+                makeMove(mainBoard, computerTile, x, y)
                 if getValidMoves(mainBoard, playerTile) == []:
-                    finish=True
-                    continue
+                    
+                    turn = 'O'
+                    if getValidMoves(mainBoard, computerTile) == []:
+                        finish=True
+                        
+                else:
+                    turn = 'X'
             
+                drawBoard(mainBoard)
+        
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    run = False
                 
-            drawBoard(mainBoard)
-            
-        if turn == 'O':
-            
-            #showPoints(playerTile, computerTile)
-            x, y = getComputerMove(mainBoard, computerTile)
-            makeMove(mainBoard, computerTile, x, y)
-            if getValidMoves(mainBoard, playerTile) == []:
-                
-                turn = 'O'
+                if event.type == pygame.KEYDOWN:
+                    print('r')
+                    
+                if event.type == pygame.MOUSEBUTTONDOWN and turn == 'X':
+                    print("x")
+                    x,y = pygame.mouse.get_pos()
+                    move = getPlayerMove(mainBoard, playerTile,x,y)
+                    if(move!=False):
+                        makeMove(mainBoard, playerTile, move[0], move[1])
+                        turn = 'O'
+                    
                 if getValidMoves(mainBoard, computerTile) == []:
-                    finish=True
-                    continue
-            else:
-                turn = 'X'
+                    turn = 'X'
+                    if getValidMoves(mainBoard, playerTile) == []:
+                        finish=True
+                        
+                
+                    
+                drawBoard(mainBoard)
+                
             
-            drawBoard(mainBoard)
                 
         
+        pygame.display.update()
+    
+    while run:
+        drawBoard(mainBoard)
         pygame.display.update()
     pygame.quit()
     
