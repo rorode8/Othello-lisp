@@ -2,31 +2,9 @@
 
 ;ALPHA-BETA PRUNING
 
-(defpackage :alphabeta
-  (:use :cl)
-  ;; custom min/max functions that support infinity
-  (:shadow min max))
 
-(in-package :alphabeta)
 
-;(defvar -∞ '-∞ "Negative infinity symbol")
-;(defvar +∞ '+∞ "Positive infinity symbol")
 
-(defun min (a b)
-  (cond
-    ((eql a 1099511627775) b)
-    ((eql b 1099511627775) a)
-    ((eql a -1099511627775) -1099511627775)
-    ((eql b -1099511627775) -1099511627775)
-    (t (cl:min a b))))
-
-(defun max (a b)
-  (cond
-    ((eql a -1099511627775) b)
-    ((eql b -1099511627775) a)
-    ((eql a 1099511627775) 1099511627775)
-    ((eql b 1099511627775) 1099511627775)
-    (t (cl:max a b))))
     
 (defun alphabeta (nodo depth alpha beta maximizing-player-p i)
   (when (or (= depth 0) (gameOver nodo))
@@ -49,12 +27,47 @@
             (return)))
         value)))
 
+;;funcion predefinida para su uso en alphabetaAux
+;;alphabetamax (contrario a su nombre) empieza minizando
+;; idealmente cambiaremos el '3' por un parametro establecido acorde a la dificultad
+(defun alphabetamax (nodo)
+	(alphabeta nodo 3 -1099511627775 1099511627775 NIL 0)
+)
+
+;;nos regresa el indice del maxico en una lista
+(defun maxindex (m lst i j)
+	(if (null lst) j
+		(if (> (first lst) m) (maxindex (first lst) (rest lst) (+ i 1) i)
+			(maxindex m (rest lst) (+ i 1) j))
+	)
+)
+
+;;corre alphabeta en todos los hijos del primer estado, nos devuelve el estado
+;;con mayor puntos
+(defun alphabetaAux (nodo)
+	(let* 
+		((movs (movimientos nodo 1 2))
+		 (tuplas (mapcar #'alphabetamax movs))
+		 (index (maxindex -1099511627775 tuplas 0 0))	
+		)
+		 (nth index movs)
+		)
+	
+)
+
+
+
+
+
+
+
 ;FUNCIÓN FINAL
 
 
 
 ;(setq estado '(0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 2 0 0 0 0 0 0 2 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0))		
 ;(setq estado '(1 0 0 0 0 1 1 1 1 2 0 0 0 1 2 2 1 0 0 0 0 0 0 0 0 2 2 1 2 0 0 0 0 1 1 2 1 0 0 0 0 0 1 1 1 1 2 0 0 0 0 0 0 2 2 2 1 0 0 0 0 0 0 2))		
+;(alphabetaAux estado)
 ;(alphabeta estado 3 -1099511627775 1099511627775 T 0)
 
 ; FUNCIÓN DE EVALUACIÓN
