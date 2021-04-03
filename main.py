@@ -10,7 +10,7 @@ import sys
 import time
 #constants
 BOARD_SIZE=483
-WIDTH,HEIGHT=780, 483
+WIDTH,HEIGHT=850, 483
 
 
 FPS = 60
@@ -51,7 +51,7 @@ def drawBoard(board):
             if(tile == 'O'):
                 fill = (240,240,240)
             elif(tile == 'X'):
-                fill=(25,25,25)
+                fill = (25,25,25)
             else:
                 continue
             drawChip(x,y,fill,line)
@@ -222,7 +222,7 @@ def getPlayerMove(board, playerTile,x1,y1):
 def showPoints(playerTile, computerTile, mainBoard):
      # Prints out the current score.
   scores = getScoreOfBoard(mainBoard)
-  print('You have %s points. The computer has %s points.' % (scores[playerTile], scores[computerTile]))
+  return scores
   
 def getComputerMove(board, computerTile):
      # Given a board and the computer's tile, determine where to
@@ -245,16 +245,28 @@ def getComputerMove(board, computerTile):
           bestScore = score
   return bestMove
 
-
+def drawScore(board, playerTile, pcTile):
+    scores = showPoints(playerTile, pcTile, board)
+    myfont = pygame.font.SysFont('Comic Sans MS', 30)
+    myfont2 = pygame.font.SysFont('Comic Sans MS', 30)
+    textsurface = myfont.render('Player: '+str(scores[playerTile]), False, (0, 0, 0))
+    textsurface2 = myfont2.render('AI: '+str(scores[pcTile]), False, (0, 0, 0))
+    rect =pygame.Rect(483, 0 ,WIDTH-483,50)
+    pygame.draw.rect(WIN,(130,130,130),rect,0)
+    WIN.blit(textsurface,(483,0))
+    WIN.blit(textsurface2,(693,0))
+    
+    
 
 def main():
+    pygame.font.init()
     run = True
     clock = pygame.time.Clock()
     # Reset the board and game.
     mainBoard = getNewBoard()
     resetBoard(mainBoard)
     playerTile, computerTile = 'X','O'
-    turn = 'X'
+    turn = 'player'
     #rect1 = pygame.Rect(0,0,20,20)
     #rect2 = pygame.Rect(20,20,30,30)
     #rect3 = pygame.Rect(5,5,5,5)
@@ -263,7 +275,7 @@ def main():
     #pygame.draw.rect(WIN,(0,255,255),rect3,0)
     finish = False
     drawBoard(mainBoard)
-    
+    drawScore(mainBoard, playerTile, computerTile)
     
     
     while run:
@@ -275,28 +287,36 @@ def main():
                if event.type == pygame.KEYDOWN and event.key == pygame.K_r:
                     mainBoard = getNewBoard()
                     resetBoard(mainBoard)
-                    playerTile, computerTile = 'X','O'
-                    turn = 'X'
+                    
+                    if playerTile == 'X':
+                        playerTile, computerTile = 'O','X'
+                        turn = 'computer'
+                    else:
+                        playerTile, computerTile = 'X','O'
+                        turn = 'player'
+                    
                     finish = False
                     drawBoard(mainBoard)
+                    drawScore(mainBoard, playerTile, computerTile)
            
         else:
             
-            if turn == 'O':
+            if turn == 'computer':
                 time.sleep(1)
                 #showPoints(playerTile, computerTile)
                 x, y = getComputerMove(mainBoard, computerTile)
                 makeMove(mainBoard, computerTile, x, y)
                 if getValidMoves(mainBoard, playerTile) == []:
                     
-                    turn = 'O'
+                    turn = 'computer'
                     if getValidMoves(mainBoard, computerTile) == []:
                         finish=True
                         
                 else:
-                    turn = 'X'
+                    turn = 'player'
             
                 drawBoard(mainBoard)
+                drawScore(mainBoard, playerTile, computerTile)
         
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -305,22 +325,23 @@ def main():
                 if event.type == pygame.KEYDOWN:
                     print('r')
                     
-                if event.type == pygame.MOUSEBUTTONDOWN and turn == 'X':
+                if event.type == pygame.MOUSEBUTTONDOWN and turn == 'player':
                     print("x")
                     x,y = pygame.mouse.get_pos()
                     move = getPlayerMove(mainBoard, playerTile,x,y)
                     if(move!=False):
                         makeMove(mainBoard, playerTile, move[0], move[1])
-                        turn = 'O'
+                        turn = 'computer'
                     
                 if getValidMoves(mainBoard, computerTile) == []:
-                    turn = 'X'
+                    turn = 'player'
                     if getValidMoves(mainBoard, playerTile) == []:
                         finish=True
                         
                 
                     
                 drawBoard(mainBoard)
+                drawScore(mainBoard, playerTile, computerTile)
                 
             
                 
