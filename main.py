@@ -345,7 +345,7 @@ def main(nums):
                 if getValidMoves(mainBoard, playerTile) == []:
                     
                     turn = 'computer'
-                    if getValidMoves(mainBoard, computerTile, num) == []:
+                    if getValidMoves(mainBoard, computerTile) == []:
                         finish=True
                         
                 else:
