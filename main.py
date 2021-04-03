@@ -18,7 +18,7 @@ FPS = 60
 WIN = pygame.display.set_mode((WIDTH,HEIGHT))
 WIN.fill((255,255,255))
 pygame.display.set_caption("Othello")
-difficulty = {1:[3,'easy'], 2:[5,'medium'], 3:[7,'hard']}
+difficulty = {1:[3,'easy','Goku'], 2:[5,'medium','Goku'], 3:[7,'hard', 'Goku']}
 
 def getRowCol(x,y):
     row = x//60
@@ -256,8 +256,11 @@ def drawScore(board, playerTile, pcTile):
     textsurface2 = myfont2.render('AI: '+str(scores[pcTile]), False, (0, 0, 0))
     rect =pygame.Rect(483, 0 ,WIDTH-483,50)
     pygame.draw.rect(WIN,(130,130,130),rect,0)
+    rival = pygame.image.load(difficulty[diff][2]+'.png').convert_alpha()
+    
     WIN.blit(textsurface,(483,0))
     WIN.blit(textsurface2,(693,0))
+    WIN.blit(rival, [BOARD_SIZE, HEIGHT-258]) 
     
 
 def menu():
@@ -288,12 +291,7 @@ def main():
     resetBoard(mainBoard)
     playerTile, computerTile = 'X','O'
     turn = 'player'
-    #rect1 = pygame.Rect(0,0,20,20)
-    #rect2 = pygame.Rect(20,20,30,30)
-    #rect3 = pygame.Rect(5,5,5,5)
-    #pygame.draw.rect(WIN,(255,0,0),rect1,0)
-    #pygame.draw.rect(WIN,(0,0,255),rect2,0)
-    #pygame.draw.rect(WIN,(0,255,255),rect3,0)
+    
     finish = False
     drawBoard(mainBoard)
     drawScore(mainBoard, playerTile, computerTile)
