@@ -10,15 +10,17 @@ import random
 import sys
 import time
 #constants
+lst = [1]
 BOARD_SIZE=483
 WIDTH,HEIGHT=850, 483
 
 diff = 1
+print('cringe')
 FPS = 60
 WIN = pygame.display.set_mode((WIDTH,HEIGHT))
 WIN.fill((255,255,255))
 pygame.display.set_caption("Othello")
-difficulty = {1:[3,'easy','Goku'], 2:[5,'medium','Goku'], 3:[7,'hard', 'Goku']}
+difficulty = {1:[3,'easy','Isabelle'], 2:[5,'medium','Peter'], 3:[7,'hard', 'Goku']}
 
 def getRowCol(x,y):
     row = x//60
@@ -248,7 +250,7 @@ def getComputerMove(board, computerTile):
           bestScore = score
   return bestMove
 
-def drawScore(board, playerTile, pcTile):
+def drawScore(board, playerTile, pcTile, num):
     scores = showPoints(playerTile, pcTile, board)
     myfont = pygame.font.SysFont('Comic Sans MS', 30)
     myfont2 = pygame.font.SysFont('Comic Sans MS', 30)
@@ -256,33 +258,47 @@ def drawScore(board, playerTile, pcTile):
     textsurface2 = myfont2.render('AI: '+str(scores[pcTile]), False, (0, 0, 0))
     rect =pygame.Rect(483, 0 ,WIDTH-483,50)
     pygame.draw.rect(WIN,(130,130,130),rect,0)
-    rival = pygame.image.load(difficulty[diff][2]+'.png').convert_alpha()
+        
+    rival = pygame.image.load(difficulty[num][2]+'.png').convert_alpha()
     
-    WIN.blit(textsurface,(483,0))
+    WIN.blit(textsurface,(BOARD_SIZE+15,0))
     WIN.blit(textsurface2,(693,0))
-    WIN.blit(rival, [BOARD_SIZE, HEIGHT-258]) 
+    WIN.blit(rival, [BOARD_SIZE, HEIGHT-300]) 
+    
+
     
 
 def menu():
+    num = 1
+    
     def set_difficulty(value, difficulty):
-        diff = value
+        num = difficulty
+        lst[0] = num
+        print(num)
         
 
     def start_the_game():
-        main()
+        print('start')
+        print(num)
+        main(num)
+
         
     pygame.init()
     menu = pygame_menu.Menu(300, 400, 'Welcome',
                        theme=pygame_menu.themes.THEME_BLUE)
 
-    #menu.add.text_input('Name :', default='John Doe')
+    
     menu.add.selector('Difficulty :', [('easy', 1), ('normal', 2), ('hard',3)], onchange=set_difficulty)
     menu.add.button('Play', start_the_game)
     menu.add.button('Quit', pygame_menu.events.EXIT)
     menu.mainloop(WIN)
     
+    
 
-def main():
+def main(nums):
+    
+    diff = nums
+    num = lst[0]
     pygame.font.init()
     run = True
     clock = pygame.time.Clock()
@@ -294,7 +310,8 @@ def main():
     
     finish = False
     drawBoard(mainBoard)
-    drawScore(mainBoard, playerTile, computerTile)
+    drawScore(mainBoard, playerTile, computerTile, num)
+    print(diff)
     
     
     while run:
@@ -316,7 +333,7 @@ def main():
                     
                     finish = False
                     drawBoard(mainBoard)
-                    drawScore(mainBoard, playerTile, computerTile)
+                    drawScore(mainBoard, playerTile, computerTile, num)
            
         else:
             
@@ -328,14 +345,14 @@ def main():
                 if getValidMoves(mainBoard, playerTile) == []:
                     
                     turn = 'computer'
-                    if getValidMoves(mainBoard, computerTile) == []:
+                    if getValidMoves(mainBoard, computerTile, num) == []:
                         finish=True
                         
                 else:
                     turn = 'player'
             
                 drawBoard(mainBoard)
-                drawScore(mainBoard, playerTile, computerTile)
+                drawScore(mainBoard, playerTile, computerTile, num)
         
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -360,7 +377,7 @@ def main():
                 
                     
                 drawBoard(mainBoard)
-                drawScore(mainBoard, playerTile, computerTile)
+                drawScore(mainBoard, playerTile, computerTile, num)
                 
             
                 
