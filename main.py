@@ -5,6 +5,7 @@ Created on Sat Mar 27 18:37:32 2021
 @author: rorod
 """
 import pygame
+import pygame_menu
 import random
 import sys
 import time
@@ -12,11 +13,12 @@ import time
 BOARD_SIZE=483
 WIDTH,HEIGHT=850, 483
 
-
+diff = 1
 FPS = 60
 WIN = pygame.display.set_mode((WIDTH,HEIGHT))
 WIN.fill((255,255,255))
 pygame.display.set_caption("Othello")
+difficulty = {1:[3,'easy'], 2:[5,'medium'], 3:[7,'hard']}
 
 def getRowCol(x,y):
     row = x//60
@@ -58,6 +60,7 @@ def drawBoard(board):
             
 def resetBoard(board):
       # Blanks out the board it is passed, except for the original starting position.
+    WIN.fill((255,255,255))
     drawEmptyCanvas()
     
     for x in range(8):
@@ -256,6 +259,24 @@ def drawScore(board, playerTile, pcTile):
     WIN.blit(textsurface,(483,0))
     WIN.blit(textsurface2,(693,0))
     
+
+def menu():
+    def set_difficulty(value, difficulty):
+        diff = value
+        
+
+    def start_the_game():
+        main()
+        
+    pygame.init()
+    menu = pygame_menu.Menu(300, 400, 'Welcome',
+                       theme=pygame_menu.themes.THEME_BLUE)
+
+    #menu.add.text_input('Name :', default='John Doe')
+    menu.add.selector('Difficulty :', [('easy', 1), ('normal', 2), ('hard',3)], onchange=set_difficulty)
+    menu.add.button('Play', start_the_game)
+    menu.add.button('Quit', pygame_menu.events.EXIT)
+    menu.mainloop(WIN)
     
 
 def main():
@@ -353,5 +374,5 @@ def main():
         pygame.display.update()
     pygame.quit()
     
-    
-main()
+menu()
+#main()
