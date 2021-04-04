@@ -1,5 +1,22 @@
 ;En general se va a asumir que los espacios vacíos están representados con 0's, las piezas propias con 1's y las rivales con 2's
 
+;lee valores
+(defun read-array (filename)
+  (with-open-file (in filename)
+    (loop for num = (read in nil)
+          until (null num)
+          collect num)))
+
+(defun write-numeric-list(filename l)
+  (with-open-file (out filename :direction :output :if-exists :append :if-does-not-exist :create)
+    (dolist (segment l)
+      (format out "~A " segment))
+    (format out "~%")))
+
+(setq lista (read-array "python.txt"))
+
+(setq niv (first lista) estadoOthello (rest lista))
+
 ;ALPHA-BETA PRUNING
 
 
@@ -31,7 +48,7 @@
 ;;alphabetamax (contrario a su nombre) empieza minizando
 ;; idealmente cambiaremos el '3' por un parametro establecido acorde a la dificultad
 (defun alphabetamax (nodo)
-	(alphabeta nodo 3 -1099511627775 1099511627775 NIL 0)
+	(alphabeta nodo 3 -1099511627775 1099511627775 NIL niv)
 )
 
 ;;nos regresa el indice del maxico en una lista
@@ -67,7 +84,7 @@
 
 ;(setq estado '(0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 2 0 0 0 0 0 0 2 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0))		
 ;(setq estado '(1 0 0 0 0 1 1 1 1 2 0 0 0 1 2 2 1 0 0 0 0 0 0 0 0 2 2 1 2 0 0 0 0 1 1 2 1 0 0 0 0 0 1 1 1 1 2 0 0 0 0 0 0 2 2 2 1 0 0 0 0 0 0 2))		
-;(alphabetaAux estado)
+;(alphabetaAux estado )
 ;(alphabeta estado 3 -1099511627775 1099511627775 T 0)
 
 ; FUNCIÓN DE EVALUACIÓN
@@ -406,3 +423,9 @@
         ((or (null cuantos) (= cuantos 0)) edoMaux)
         (t (setf (nth (- n cuantos) (nth (+ m cuantos) edoMaux)) jugador) (cambiosDiagDer2 edoMaux m n (- cuantos 1) jugador))))
         
+
+(setq res (alphabetaAux estadoOthello))
+(write-numeric-list "lispOutput.txt" res)
+
+
+

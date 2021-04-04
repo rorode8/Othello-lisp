@@ -9,6 +9,8 @@ import pygame_menu
 import random
 import sys
 import time
+import subprocess
+import os
 #constants
 lst = [1]
 BOARD_SIZE=483
@@ -293,7 +295,39 @@ def menu():
     menu.add.button('Quit', pygame_menu.events.EXIT)
     menu.mainloop(WIN)
     
+
+def exportMatrix(mainBoard,PlayerTile,ComputerTile, num):    #exports the board to a txt file
     
+    text = open("python.txt",'w')
+    line=str(difficulty[num][0])+' '
+    for j in range(len(mainBoard)):
+        for i in range(len(mainBoard[j])):
+            if(mainBoard[i][j]==PlayerTile):
+                line+='2 '
+            elif(mainBoard[i][j]==ComputerTile):
+                line+='1 '
+            else:
+                line+='0 '
+    line = line[:-1]
+    text.write(line)
+    text.close()
+    
+def readStack(file,playerTile,computerTile):
+    
+    with open(file, 'r') as file:
+        
+        data = file.read().replace('\n', ' ')
+        data=data.replace('2',playerTile)
+        data=data.replace('1',computerTile)
+        res = data.split(' ')
+        return res
+
+def findTuple(board,arr):
+    for j in range(len(board)):
+        for i in range(len(board[j])):
+            p=j*8+i
+            if(board[i][j]==' ' and ( not arr[p] =='0')):
+                return [i,j]
 
 def main(nums):
     
@@ -341,7 +375,20 @@ def main(nums):
                 time.sleep(1)
                 #showPoints(playerTile, computerTile)
                 x, y = getComputerMove(mainBoard, computerTile)
-                makeMove(mainBoard, computerTile, x, y)
+                print('r')
+                exportMatrix(mainBoard,playerTile,computerTile,num)
+                
+                try:
+                    os.remove("lispOutput.txt")
+                except OSError:
+                    pass
+                subprocess.call([r'runlisp.bat'])
+                res = readStack('lispOutput.txt',playerTile,computerTile)
+                print(res)
+                print('space')
+                l = findTuple(mainBoard, res)
+                print(l)                
+                makeMove(mainBoard, computerTile, l[0], l[1])
                 if getValidMoves(mainBoard, playerTile) == []:
                     
                     turn = 'computer'
@@ -358,8 +405,7 @@ def main(nums):
                 if event.type == pygame.QUIT:
                     run = False
                 
-                if event.type == pygame.KEYDOWN:
-                    print('r')
+                                   
                     
                 if event.type == pygame.MOUSEBUTTONDOWN and turn == 'player':
                     print("x")
@@ -388,6 +434,7 @@ def main(nums):
         drawBoard(mainBoard)
         pygame.display.update()
     pygame.quit()
+
     
 menu()
 #main()
