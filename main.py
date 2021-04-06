@@ -16,6 +16,9 @@ lst = [1]
 BOARD_SIZE=483
 WIDTH,HEIGHT=850, 483
 
+pygame.mixer.init()
+winS = pygame.mixer.Sound('win.mp3')
+loseS = pygame.mixer.Sound('lose.mp3')
 diff = 1
 print('cringe')
 FPS = 60
@@ -54,9 +57,9 @@ def drawBoard(board):
         for x in range(8):
             tile = board[x][y]
             line = (10,10,10)
-            if(tile == 'O'):
+            if(tile == 'O'):    #O denotes a white tile
                 fill = (240,240,240)
-            elif(tile == 'X'):
+            elif(tile == 'X'):  # X denotes a black tile
                 fill = (25,25,25)
             else:
                 continue
@@ -257,14 +260,14 @@ def drawScore(board, playerTile, pcTile, num):
     myfont = pygame.font.SysFont('Comic Sans MS', 30)
     myfont2 = pygame.font.SysFont('Comic Sans MS', 30)
     textsurface = myfont.render('Player: '+str(scores[playerTile]), False, (0, 0, 0))
-    textsurface2 = myfont2.render('AI: '+str(scores[pcTile]), False, (0, 0, 0))
+    textsurface2 = myfont2.render(difficulty[num][2]+': '+str(scores[pcTile]), False, (0, 0, 0))
     rect =pygame.Rect(483, 0 ,WIDTH-483,50)
     pygame.draw.rect(WIN,(130,130,130),rect,0)
         
     rival = pygame.image.load(difficulty[num][2]+'.png').convert_alpha()
     
     WIN.blit(textsurface,(BOARD_SIZE+15,0))
-    WIN.blit(textsurface2,(693,0))
+    WIN.blit(textsurface2,(WIDTH-textsurface2.get_width(),0))
     WIN.blit(rival, [BOARD_SIZE, HEIGHT-300]) 
     
 
@@ -312,6 +315,26 @@ def exportMatrix(mainBoard,PlayerTile,ComputerTile, num):    #exports the board 
     text.write(line)
     text.close()
     
+def exportMatrix2(mainBoard,computerTile, num):    #exports the board with - , B and W
+    
+    text = open("python.txt",'w')
+    line=str(difficulty[num][0])+' '
+    if(computerTile=='O'):
+        line+='W '
+    else:
+        line+='B '
+    for j in range(len(mainBoard)):
+        for i in range(len(mainBoard[j])):
+            if(mainBoard[i][j]=='X'):
+                line+='B '
+            elif(mainBoard[i][j]=='O'):
+                line+='W '
+            else:
+                line+='- '
+    line = line[:-1]
+    text.write(line)
+    text.close()
+    
 def readStack(file,playerTile,computerTile):
     
     with open(file, 'r') as file:
@@ -322,12 +345,45 @@ def readStack(file,playerTile,computerTile):
         res = data.split(' ')
         return res
 
+def readStack2(file):   #reads input from lisp
+    
+    with open(file, 'r') as file:
+        
+        data = file.read().replace('\n', ' ')
+        res = data.split(' ')
+        
+        return res
+
 def findTuple(board,arr):
     for j in range(len(board)):
         for i in range(len(board[j])):
             p=j*8+i
             if(board[i][j]==' ' and ( not arr[p] =='0')):
                 return [i,j]
+            
+def findTuple2(board,arr):
+    for j in range(len(board)):
+        for i in range(len(board[j])):
+            p=j*8+i
+            if(board[i][j]==' ' and ( not arr[p] =='-')):
+                return [i,j]
+
+def endScreen(board, playerTile, pcTile):
+    scores = showPoints(playerTile, pcTile, board)
+    if(scores[playerTile]>scores[pcTile]):
+        endScreen = pygame.image.load('win.png').convert_alpha()
+        s=winS
+        
+    else:
+        endScreen = pygame.image.load('lose.png').convert_alpha()
+        s=loseS
+        
+    s.set_volume(0.3)
+    
+    endScreen = pygame.transform.scale(endScreen,(WIDTH,HEIGHT))
+    WIN.blit(endScreen,(0,0))
+    s.play()
+    pass
 
 def main(nums):
     
@@ -346,6 +402,7 @@ def main(nums):
     drawBoard(mainBoard)
     drawScore(mainBoard, playerTile, computerTile, num)
     print(diff)
+    oneTime=True
     
     
     while run:
@@ -353,6 +410,11 @@ def main(nums):
         clock.tick(FPS)
         #print(turn)
         if(finish):
+            
+           
+           if(oneTime):
+               endScreen(mainBoard,playerTile,computerTile)
+               oneTime=False
            for event in pygame.event.get():
                if event.type == pygame.KEYDOWN and event.key == pygame.K_r:
                     mainBoard = getNewBoard()
@@ -368,6 +430,8 @@ def main(nums):
                     finish = False
                     drawBoard(mainBoard)
                     drawScore(mainBoard, playerTile, computerTile, num)
+                    oneTime=True
+                    
            
         else:
             
@@ -376,17 +440,20 @@ def main(nums):
                 #showPoints(playerTile, computerTile)
                 x, y = getComputerMove(mainBoard, computerTile)
                 print('r')
-                exportMatrix(mainBoard,playerTile,computerTile,num)
+                #exportMatrix(mainBoard,playerTile,computerTile,num)
+                exportMatrix2(mainBoard, computerTile ,num)
                 
                 try:
                     os.remove("lispOutput.txt")
                 except OSError:
                     pass
                 subprocess.call([r'runlisp.bat'])
-                res = readStack('lispOutput.txt',playerTile,computerTile)
+                res = readStack2('lispOutput.txt')
+                #res = readStack('lispOutput.txt',playerTile,computerTile)
                 print(res)
                 print('space')
-                l = findTuple(mainBoard, res)
+                #l = findTuple(mainBoard, res)
+                l = findTuple2(mainBoard, res)
                 print(l)                
                 makeMove(mainBoard, computerTile, l[0], l[1])
                 if getValidMoves(mainBoard, playerTile) == []:

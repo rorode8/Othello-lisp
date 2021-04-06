@@ -1,2 +1,2 @@
-sbcl --script Othello.lisp
+sbcl --script ot.lisp
 
