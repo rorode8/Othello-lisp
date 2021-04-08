@@ -335,7 +335,7 @@
 
 (defun movimientos (estado jugador rival)
     (setq sigNivel NIL estadoM `(,(nthcdr 0 (reverse (nthcdr (max (- (length estado) 8) 0) (reverse estado)))) ,(nthcdr 8 (reverse (nthcdr (max (- (length estado) 16) 0) (reverse estado)))) ,(nthcdr 16 (reverse (nthcdr (max (- (length estado) 24) 0) (reverse estado)))) ,(nthcdr 24 (reverse (nthcdr (max (- (length estado) 32) 0) (reverse estado)))) ,(nthcdr 32 (reverse (nthcdr (max (- (length estado) 40) 0) (reverse estado)))) ,(nthcdr 40 (reverse (nthcdr (max (- (length estado) 48) 0) (reverse estado)))) ,(nthcdr 48 (reverse (nthcdr (max (- (length estado) 56) 0) (reverse estado)))) ,(nthcdr 56 (reverse (nthcdr (max (- (length estado) 64) 0) (reverse estado))))) movs (recorreMatriz estado estadoM 0 jugador rival))
-    (if (null movs) estado movs))
+    (if (null movs) (list estado) movs))
 
 (defun recorreMatriz (estado estadoM i jugador rival)
     (cond
