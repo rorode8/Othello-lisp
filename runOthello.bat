@@ -1,0 +1,2 @@
+sbcl --script Othello.lisp
+
